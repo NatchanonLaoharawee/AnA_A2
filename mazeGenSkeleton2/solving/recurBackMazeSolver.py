@@ -33,7 +33,7 @@ class RecurBackMazeSolver(MazeSolver):
 
 		# run recursive backtracking/DFS from starting cell
         stack : deque = deque()
-        stack.append(startCoord)
+        # stack.append(startCoord)
         currCell : Coordinates3D = startCoord 
         visited : set[Coordinates3D] = set([startCoord])
 
