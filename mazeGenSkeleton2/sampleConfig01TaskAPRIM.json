@@ -12,7 +12,7 @@
     [0, 3, 5],
     [0, 5, 4]
   ],
-  "generator": "recur",
+  "generator": "prim",
   "solver": "recur",
   "solverEntranceIndex": 1,
   "visualise": true

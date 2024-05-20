@@ -1,3 +1,5 @@
+This is from the assignment specification
+----------------------------------------------
 The main script is mazeTester.py.
 There are four sample configuration files, one for each task.  These specify the parameters used to run assignment 2.
 
@@ -12,3 +14,6 @@ On the core teaching servers, matplotlib isn't installed, hence visualisation wo
 
 Please avoid modifying the provided files, apart from implementing adjListGraph.py and adjMatGraph.py.
 If you must modify anything, please check in with the teaching team first.
+
+My own notes
+----------------------------------------------
