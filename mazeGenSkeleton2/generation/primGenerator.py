@@ -27,12 +27,12 @@ class PrimMazeGenerator(MazeGenerator):
 
         # select starting cell
         # random floor
-        startLevel = randint(0, maze.levelNum() - 1)
+        randomLevel = randint(0, maze.levelNum() - 1)
         # start coordinate generated
         startCoord: Coordinates3D = Coordinates3D(
-            startLevel,
-            randint(0, maze.rowNum(startLevel) - 1),
-            randint(0, maze.colNum(startLevel) - 1),
+            randomLevel,
+            randint(0, maze.rowNum(randomLevel) - 1),
+            randint(0, maze.colNum(randomLevel) - 1),
         )
 
         # pq = PriorityQueue
@@ -94,6 +94,6 @@ class PrimMazeGenerator(MazeGenerator):
 
             # change currCell for next iteration
             currCell = selectedNode
-        # while loop exits when all cells are in the visited set
+        # loop exits when all cells are in the visited set
         self.m_mazeGenerated = True
         # pass
