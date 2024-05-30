@@ -13,6 +13,7 @@ from maze.util import Coordinates3D
 
 from enum import Enum
 
+
 class Directions(Enum):
     """
     Convention is (level, row, col) for constructing 3D Coordinates
@@ -27,13 +28,13 @@ class Directions(Enum):
     SOUTH_WEST = Coordinates3D(-1, 0, 0)  # Down
     WEST = Coordinates3D(0, 0, -1)
 
-
     # Function to get coordinate, though can be done with .value
-    def getValue(self)->Coordinates3D:
+    def getValue(self) -> Coordinates3D:
         """
         Gets Coordinates3D value of direction
         """
         return self.value
+
     # Functions to get the next direction
     def getRight(self):
         """
@@ -41,42 +42,51 @@ class Directions(Enum):
         """
         directions = list(Directions)
         current_index = directions.index(self)
-        next_index = (current_index + 1) % len(directions)  # Cycle to the beginning if at the end
+        next_index = (current_index + 1) % len(
+            directions
+        )  # Cycle to the beginning if at the end
         return directions[next_index]
-    
+
     def getLeft(self):
         """
         Gets the left direction of a current value according to the order of enums
         """
         directions = list(Directions)
         current_index = directions.index(self)
-        next_index = (current_index - 1) % len(directions)  # Cycle to the beginning if at the end
+        next_index = (current_index - 1) % len(
+            directions
+        )  # Cycle to the beginning if at the end
         return directions[next_index]
-    
+
     # Function to get the opposite direction
     def getOppositeDirection(self):
         """
-        Get the opposite direction of the current direction, 
+        Get the opposite direction of the current direction,
         which is currently 3 rotations to the left or right
         """
         directions = list(Directions)
         current_index = directions.index(self)
-        next_index = (current_index + 3) % len(directions)  # Cycle to the beginning if at the end
+        next_index = (current_index + 3) % len(
+            directions
+        )  # Cycle to the beginning if at the end
         return directions[next_index]
 
-    
     # Function used to get the direction after entering a boundary space
     def getDirection(srcCell, destCell):
         """
         Return direction enum between based on a source cell and destination cell that are adjacent
         """
         # direction found by finding the difference between destination cell and current cell.
-        destinationDirection = Coordinates3D(destCell.getLevel() - srcCell.getLevel(), destCell.getRow() - srcCell.getRow(), destCell.getCol() - srcCell.getCol())
+        destinationDirection = Coordinates3D(
+            destCell.getLevel() - srcCell.getLevel(),
+            destCell.getRow() - srcCell.getRow(),
+            destCell.getCol() - srcCell.getCol(),
+        )
         for direction in Directions:
             if direction.value == destinationDirection:
                 return direction
         return None
-    
+
 
 class WallFollowingMazeSolver(MazeSolver):
     """
@@ -87,29 +97,28 @@ class WallFollowingMazeSolver(MazeSolver):
         super().__init__()
         self.m_name = "wall"
 
-
     def solveMaze(self, maze: Maze3D, entrance: Coordinates3D):
         # TODO: Implement this for task B!
         self.m_solved = False
-        startCoord : Coordinates3D = entrance
+        startCoord: Coordinates3D = entrance
 
         # Set beginning direction
-        BEGINNING_DIRECTION : Directions = Directions.NORTH
-        
+        BEGINNING_DIRECTION: Directions = Directions.NORTH
 
         # currCell is startCoord
-        currCell : Coordinates3D = startCoord
+        currCell: Coordinates3D = startCoord
         # Beginning direction of algorithm
-        currDirection : Directions = BEGINNING_DIRECTION
+        currDirection: Directions = BEGINNING_DIRECTION
 
         # Begin algorithm
         while currCell not in maze.getExits():
-            # append cell visited by algorithm 
+            # append cell visited by algorithm
             self.solverPathAppend(currCell)
 
-            # Get list of neighbours (which should just be the neighbour that re-enters the maze)
+            # Get list of neighbours
             neighbours: list[Coordinates3D] = maze.neighbours(currCell)
 
+            # Neighbours that can be visited (non walls)
             possibleNeighs: list[Coordinates3D] = [
                 neigh
                 for neigh in neighbours
@@ -119,51 +128,21 @@ class WallFollowingMazeSolver(MazeSolver):
                 and (neigh.getCol() >= -1)
                 and (neigh.getCol() <= maze.colNum(neigh.getLevel()))
             ]
+            # Get opposite direction (which cell you came from)
+            currDirection = currDirection.getOppositeDirection()
 
-            print("Possible neighbours is: ")
-            for neigh in possibleNeighs:
-                print(neigh)
-            print("Current cell is: ", currCell)
-            print("Current direction is : ", currDirection)
-            # Check if boundary
-            if currCell in maze.getEntrances():
-                # Save direction as difference of coordinates
-                neigh = possibleNeighs.pop()
-                currDirection = Directions.getDirection(currCell, neigh)
-                # Traverse to neighbour
-                print("Current cell before moving back from boundary is: ", currCell)
-                currCell = neigh
-                print("Current cell after moving back from boundary is: ", currCell)
-                print("Current direction after moving back from boundary: ", currDirection)
-            # Else, continue normal traversal
-            else:
-                # Get opposite direction (which cell you came from)
-                currDirection = currDirection.getOppositeDirection()
-                print("Opposite direction is: ", currDirection)
-
+            # Check wall one rotation to the right, change this to change which wall to follow
+            currDirection = currDirection.getLeft()
+            # While cannot move forward
+            while (currCell + currDirection.getValue()) not in possibleNeighs:
                 # Check wall one rotation to the right, change this to change which wall to follow
                 currDirection = currDirection.getLeft()
-                print("Checking wall at: ", currDirection)
-                # While cannot move forward
-                while ((currCell + currDirection.getValue()) not in possibleNeighs):
-                    # Check wall one rotation to the right, change this to change which wall to follow
-                    currDirection = currDirection.getLeft() 
-                    print("Checking wall at: ", currDirection)
 
-                # Move forward if there is no wall
-                currCell = currCell + currDirection.getValue()
-
-            print("Current cell after conditions is: ", currCell)
-            print("Current direction after conditions is: ", currDirection)
-            print()
+            # Move forward if there is no wall
+            currCell = currCell + currDirection.getValue()
 
         # ensure we are currently at the exit
         if currCell in maze.getExits():
             # append exit cell to solverPath
             self.solverPathAppend(currCell)
             self.solved(entrance, currCell)
-
-
-                
-
-

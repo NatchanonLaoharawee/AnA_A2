@@ -94,17 +94,27 @@ class WilsonMazeGenerator(MazeGenerator):
             currCell: Coordinates3D = selectedCoord
             while currCell not in finalised:
                 neighbours: list[Coordinates3D] = maze.neighbours(currCell)
-                selectedNeigh = choice(neighbours)
+
+                possibleNeighs: list[Coordinates3D] = [
+                    neigh
+                    for neigh in neighbours
+                    if not maze.isBoundary(neigh)
+                    and (neigh.getRow() >= -1)
+                    and (neigh.getRow() <= maze.rowNum(neigh.getLevel()))
+                    and (neigh.getCol() >= -1)
+                    and (neigh.getCol() <= maze.colNum(neigh.getLevel()))
+                ]
+                selectedNeighs = choice(possibleNeighs)
                 # if selected node is already in walk, then a loop has formed - backtrack the walk to the already visited node
-                if selectedNeigh in walk:
+                if selectedNeighs in walk:
                     # begin backtrack
                     backtrackedCell = walk.pop()
                     # back track to selectedNeigh (which is already in the walk)
-                    while backtrackedCell != selectedNeigh:
+                    while backtrackedCell != selectedNeighs:
                         backtrackedCell = walk.pop()
                 # push or re-push node that was already in the walk
-                walk.append(selectedNeigh)
-                currCell = selectedNeigh
+                walk.append(selectedNeighs)
+                currCell = selectedNeighs
             # loop exits when currCell visits a finalised node
 
             # first cell in walk will always be the finalised cell
