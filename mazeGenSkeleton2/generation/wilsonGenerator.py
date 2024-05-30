@@ -118,4 +118,3 @@ class WilsonMazeGenerator(MazeGenerator):
                 finalised.add(currCell)
                 finalisedCell = currCell
         self.m_mazeGenerated = True
-        # pass
