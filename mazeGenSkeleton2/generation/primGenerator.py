@@ -11,15 +11,21 @@ from maze.util import Coordinates3D
 from generation.mazeGenerator import MazeGenerator
 
 # Imported libraries
+import heapq
 from random import randint, choice
-
+from queue import PriorityQueue
 
 class PrimMazeGenerator(MazeGenerator):
     """
     Prim's algorithm maze generator.
     TODO: Complete the implementation (Task A)
     """
-
+    def inPriorityQueue(self, queue, item):
+        """
+        Searches through priority queue for a passed item 
+        """
+        return any(element[1] == item for element in queue)
+    
     def generateMaze(self, maze: Maze3D):
         # TODO: Implement this method for task A.
         # make sure we start the maze with all walls there
@@ -35,17 +41,12 @@ class PrimMazeGenerator(MazeGenerator):
             randint(0, maze.colNum(randomLevel) - 1),
         )
 
-        # pq = PriorityQueue
-
-        # put the starting coordinate in the priority queue, with a weight of 0
-        # pq.put(0, startCoord)
-
         currCell: Coordinates3D = startCoord
 
         visited: set[Coordinates3D] = set([startCoord])
 
         # frontier set will hold all possible neighbours that can be visited
-        frontier: set[Coordinates3D] = set()
+        frontier = [] 
 
         totalCells = sum(
             [maze.rowNum(l) * maze.colNum(l) for l in range(maze.levelNum())]
@@ -64,11 +65,14 @@ class PrimMazeGenerator(MazeGenerator):
                 and neigh.getCol() >= 0
                 and neigh.getCol() < maze.colNum(neigh.getLevel())
             ]
-            # adds each element from the list (not the whole list as an element)
-            frontier.update(nonVisitedNeighs)
+            # adds each element from the list of neighbours 
+            #  and give them their weights here
+            for neigh in nonVisitedNeighs:
+                if not self.inPriorityQueue(frontier, neigh): 
+                    heapq.heappush(frontier, (1, neigh))
 
-            # (YOU CAN ADD WEIGHTS HERE TODO:)visit any node in the frontier set
-            selectedNode = choice(list(frontier))
+            # visit any node in the frontier set and remove from the set
+            priority, selectedNode = heapq.heappop(frontier)
 
             # find which node to carve from
             neighbours = maze.neighbours(selectedNode)
@@ -81,6 +85,8 @@ class PrimMazeGenerator(MazeGenerator):
                 and neigh.getCol() >= 0
                 and neigh.getCol() < maze.colNum(neigh.getLevel())
             ]
+
+            # Choose a random vsiited neighbour to carve a wall from
             selectedNeighbour = choice(visitedNeighs)
 
             # remove wall between the current cell and the chosen node
@@ -88,9 +94,6 @@ class PrimMazeGenerator(MazeGenerator):
 
             # mark chosen node as visited
             visited.add(selectedNode)
-
-            # remove selected node from frontier set (so it is not chosen again)
-            frontier.remove(selectedNode)
 
             # change currCell for next iteration
             currCell = selectedNode
