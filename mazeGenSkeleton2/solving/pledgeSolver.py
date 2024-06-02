@@ -78,16 +78,18 @@ class PledgeDirections(Enum):
         Tries to return the number of turns made to get the destDirection
         """
         directions = list(PledgeDirections)
-        numTurns = directions.index(self)
-        if (wallFollowerType == "right"):
-            while currDirection != destDirection:
-                currDirection = currDirection.getLeft()
+        # numTurns = directions.index(self)
+        # if (wallFollowerType == "right"):
+        #     while currDirection != destDirection:
+        #         currDirection = currDirection.getLeft()
 
-        elif (wallFollowerType == "left"):
+        # elif (wallFollowerType == "left"):
 
-        else:
-            raise("Unexpected wallFollowerType passed as argument")
-        return numTurns
+        # else:
+        #     raise("Unexpected wallFollowerType passed as argument")
+        # return numTurns
+
+        pass
 
 
 
