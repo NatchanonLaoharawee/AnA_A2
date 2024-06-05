@@ -112,6 +112,11 @@ class WallFollowingMazeSolver(MazeSolver):
 
         # Begin algorithm
         while currCell not in maze.getExits():
+            # This code is used to only append when the cell visited is unique. 
+            # (This is to check for loops)
+            # if (currCell, False) not in self.m_solverPath:
+            # self.solverPathAppend(currCell)
+
             # append cell visited by algorithm
             self.solverPathAppend(currCell)
 

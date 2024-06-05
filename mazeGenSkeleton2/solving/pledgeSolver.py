@@ -141,17 +141,19 @@ class PledgeMazeSolver(MazeSolver):
                 counter: int = 0
                 # currDirection is selectDirection
                 currDirection = selectDirection
-                # turn left instead of right for right-wall follower
+                # turn left instead of right (to touch wall) for right-wall follower
                 # Get opposite direction (which cell you came from)
                 currDirection = currDirection.getOppositeDirection()
 
                 # Check wall one rotation to the left
                 currDirection = currDirection.getRight()
+                counter += -1
 
                 # While cannot move forward
                 while (currCell + currDirection.getValue()) not in possibleNeighs:
                     # Check wall one rotation to the left, save to counter
                     currDirection = currDirection.getRight()
+                    counter += -1
 
                 # Save left turn as negative because
                 counter += -1
