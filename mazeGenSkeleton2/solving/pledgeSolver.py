@@ -70,27 +70,62 @@ class PledgeDirections(Enum):
         )  # Cycle to the beginning if at the end
         return directions[next_index]
 
-    def getNumberOfTurns(self, currDirection, destDirection, wallFollowerType):
+    def getNumberOfTurns(self, currDirection, destDirection, wallFollowerType)->int:
         """
         Takes currDirection of algorithm at cell and a destDirection of algorithm,
         which is the direction of the next cell.
         Also takes a right or left string to indicate direction of wall follower
         Tries to return the number of turns made to get the destDirection
         """
-        directions = list(PledgeDirections)
-        # numTurns = directions.index(self)
-        # if (wallFollowerType == "right"):
-        #     while currDirection != destDirection:
-        #         currDirection = currDirection.getLeft()
+        numTurns = 0
+        tempTurnCounter = 0
+        currDirection = currDirection.getOppositeDirection()
+        # Turn counter for right wall follower
+        if (wallFollowerType == "right"):
+            # Do one turn first, to avoid base case
+            currDirection.getRight()
+            tempTurnCounter += 1
+            # Calculate number of turns
+            while currDirection != destDirection:
+                currDirection = currDirection.getRight()
+                tempTurnCounter += 1
+            # Exit loop as number of turns gathered. 
+        # Turn counter for left wall follower
+        elif (wallFollowerType == "left"):
+            # Do one turn first, to avoid base case
+            currDirection.getLeft()
+            tempTurnCounter += 1
+            # Calculate number of turns
+            while currDirection != destDirection:
+                currDirection = currDirection.getLeft()
+                tempTurnCounter += 1
+            # Exit loop as number of turns gathered. 
 
-        # elif (wallFollowerType == "left"):
+        else:
+            raise("Unexpected wallFollowerType passed as argument")
+        
+        # After getting number of turns, calculate number of turns to return
+        # -60 degree turn
+        if (tempTurnCounter == 1): 
+            numTurns = -1
+        # -120 degree turn
+        elif (tempTurnCounter == 2): 
+            numTurns = -2
+        # 0 degree turn
+        elif (tempTurnCounter == 3): 
+            numTurns = 0
+        # 120 degree turn
+        elif (tempTurnCounter == 4):
+            numTurns = 2
+        # 60 degree turn 
+        elif (tempTurnCounter == 5): 
+            numTurns = 1
+        # -180 degree turn
+        elif (tempTurnCounter == 6): 
+            numTurns = -3
 
-        # else:
-        #     raise("Unexpected wallFollowerType passed as argument")
-        # return numTurns
-
-        pass
-
+        # return numTurns for pledge algorithm
+        return numTurns
 
 
 class PledgeMazeSolver(MazeSolver):
@@ -111,10 +146,18 @@ class PledgeMazeSolver(MazeSolver):
 
         currCell: Coordinates3D = startCoord
 
-        # Select a direction of preference
+        # Select a direction of preference, currently random
         selectDirection: PledgeDirections = choice(list(PledgeDirections))
 
+        print("Randomised pledge direction is: ", selectDirection)
+
+        # Beginning direction 
+        currDirection : PledgeDirections = selectDirection
         while currCell not in maze.getExits():
+            # This code is used to only append when the cell visited is unique. 
+            if (currCell, False) not in self.m_solverPath:
+                self.solverPathAppend(currCell) 
+            
             # find all neighbours of current cell
             neighbours: list[Coordinates3D] = maze.neighbours(currCell)
 
@@ -134,46 +177,66 @@ class PledgeMazeSolver(MazeSolver):
             if currCell + selectDirection.getValue() in possibleNeighs:
                 # Move in that direction
                 currCell = currCell + selectDirection.getValue()
+
             # Else there is a wall, perform wall following
             else:
-                # Perform wall following
                 # Start counter at 0; negative is a left turn, and positive is a right turn
-                counter: int = 0
-                # currDirection is selectDirection
-                currDirection = selectDirection
+                turnCounter: int = 0
+
+
                 # turn left instead of right (to touch wall) for right-wall follower
-                # Get opposite direction (which cell you came from)
-                currDirection = currDirection.getOppositeDirection()
-
                 # Check wall one rotation to the left
-                currDirection = currDirection.getRight()
-                counter += -1
-
-                # While cannot move forward
-                while (currCell + currDirection.getValue()) not in possibleNeighs:
+                destDirection = currDirection.getLeft()
+                turnCounter += -1
+                # While cannot move forward - this loop is redundant for first iteration, as there can only be at most three left turns, 
+                # but kept for readability
+                while (currCell + destDirection.getValue()) not in possibleNeighs:
                     # Check wall one rotation to the left, save to counter
-                    currDirection = currDirection.getRight()
-                    counter += -1
+                    destDirection = destDirection.getLeft()
+                    turnCounter += -1
 
-                # Save left turn as negative because
-                counter += -1
-                # Move forward while there is no wall
-                while currCell not in maze.getExits() or counter != 0:
+                # Increment turnCounter by value of turns
+                # After finding a valid neighbour, set currDirection to destDirection
+                currDirection = destDirection
+                # Traverse in that direction
+                currCell = currCell + currDirection.getValue()
+                
+
+                # Now do right wall-follower until counter is 0, should be -1 or -2 when starting.
+                while (currCell not in maze.getExits() and turnCounter != 0):
+                    # This code is used to only append when the cell visited is unique. 
+                    if (currCell, False) not in self.m_solverPath:  
+                        self.solverPathAppend(currCell) 
+
+                    # find all neighbours of current cell
+                    neighbours: list[Coordinates3D] = maze.neighbours(currCell)
+
+                    # filter to ones that haven't been visited and within boundary and doesn't have a wall between them
+                    possibleNeighs: list[Coordinates3D] = [
+                        neigh
+                        for neigh in neighbours
+                        if not maze.hasWall(currCell, neigh)
+                        and (neigh.getRow() >= -1)
+                        and (neigh.getRow() <= maze.rowNum(neigh.getLevel()))
+                        and (neigh.getCol() >= -1)
+                        and (neigh.getCol() <= maze.colNum(neigh.getLevel()))
+                    ]
+                    
+                    destDirection = currDirection.getOppositeDirection()
+                    # Right wall follower, rotate left by one.
+                    destDirection = destDirection.getLeft()
+                    # rotate left until you can move forward
+                    while (currCell + destDirection.getValue()) not in possibleNeighs:
+                        destDirection = destDirection.getLeft() 
+                    
+                    turnCounter += PledgeDirections.getNumberOfTurns(self, currDirection, destDirection, "right")
+                    
+                    currDirection = destDirection
+
+                    # Traverse to next cell
                     currCell = currCell + currDirection.getValue()
 
-                while currCell not in maze.getExits() or counter != 0:
-                    # Get opposite direction (which cell you came from)
-                    currDirection = currDirection.getOppositeDirection()
-
-                    # Check wall one rotation to the right, change this to change which wall to follow
-                    currDirection = currDirection.getLeft()
-                    # While cannot move forward
-                    while (currCell + currDirection.getValue()) not in possibleNeighs:
-                        # Check wall one rotation to the right, change this to change which wall to follow
-                        currDirection = currDirection.getLeft()
-
-                    # Move forward if there is no wall
-                    currCell = currCell + currDirection.getValue()
+                # end wall follower when currCell is an exit or turnCounter is 0.
 
         # ensure we are currently at the exit
         if currCell in maze.getExits():
