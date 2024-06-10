@@ -66,9 +66,8 @@ class Directions(Enum):
         """
         directions = list(Directions)
         current_index = directions.index(self)
-        next_index = (current_index + 3) % len(
-            directions
-        )  # Cycle to the beginning if at the end
+        next_index = (current_index + 3) % len(directions)
+        # Cycle to the beginning if at the end
         return directions[next_index]
 
     # Function used to get the direction after entering a boundary space
@@ -112,9 +111,9 @@ class WallFollowingMazeSolver(MazeSolver):
 
         # Begin algorithm
         while currCell not in maze.getExits():
-            # This code is used to only append when the cell visited is unique. 
+            # This code is used to only append when the cell visited is unique.
             if (currCell, False) not in self.m_solverPath:
-                self.solverPathAppend(currCell) 
+                self.solverPathAppend(currCell)
 
             # append cell visited by algorithm
             # self.solverPathAppend(currCell)
