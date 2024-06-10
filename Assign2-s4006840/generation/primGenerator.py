@@ -15,17 +15,19 @@ import heapq
 from random import randint, choice
 from queue import PriorityQueue
 
+
 class PrimMazeGenerator(MazeGenerator):
     """
     Prim's algorithm maze generator.
     TODO: Complete the implementation (Task A)
     """
+
     def inPriorityQueue(self, queue, item):
         """
-        Searches through priority queue for a passed item 
+        Searches through priority queue for a passed item
         """
         return any(element[1] == item for element in queue)
-    
+
     def generateMaze(self, maze: Maze3D):
         # TODO: Implement this method for task A.
         # make sure we start the maze with all walls there
@@ -46,7 +48,7 @@ class PrimMazeGenerator(MazeGenerator):
         visited: set[Coordinates3D] = set([startCoord])
 
         # frontier set will hold all possible neighbours that can be visited
-        frontier = [] 
+        frontier = []
 
         totalCells = sum(
             [maze.rowNum(l) * maze.colNum(l) for l in range(maze.levelNum())]
@@ -65,13 +67,14 @@ class PrimMazeGenerator(MazeGenerator):
                 and neigh.getCol() >= 0
                 and neigh.getCol() < maze.colNum(neigh.getLevel())
             ]
-            # adds each element from the list of neighbours 
+            # adds each element from the list of neighbours
             #  and give them their weights here
             for neigh in nonVisitedNeighs:
-                if not self.inPriorityQueue(frontier, neigh): 
+                if not self.inPriorityQueue(frontier, neigh):
+                    # Changing weights here
                     heapq.heappush(frontier, (1, neigh))
 
-            # visit any node in the frontier set and remove from the set
+            # visit node with the lowest priority in the frontier priority queue and remove from the priority queue
             priority, selectedNode = heapq.heappop(frontier)
 
             # find which node to carve from
